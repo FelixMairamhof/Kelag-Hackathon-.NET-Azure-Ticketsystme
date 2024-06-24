@@ -56,6 +56,12 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
 
   properties: {
     managedEnvironmentId: containerAppEnvironment.id
+    identity: {
+      type: 'UserAssigned'
+      userAssignedIdentities: {
+        '${managedIdentity.id}': {}
+      }
+    }
     configuration: {
       ingress: {
         external: true
@@ -75,7 +81,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
         {
           name: 'keyvaultsecret'
           keyVaultUrl: 'https://kv-forstsee-hackathon.vault.azure.net/secrets/hackthonDbConnection/0982866f102b48cebcc8442af89dc087'
-          identity: managedIdentity.id
+          // identity: managedIdentity.id
         }
       ]
       registries: [
