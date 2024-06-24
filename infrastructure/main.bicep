@@ -19,7 +19,7 @@ var containerAppName = take('ca-${appName}-${postfix}', 32)
 var logAnalyticsWorkspaceName = take('logs-${appName}-${postfix}', 32)
 
 resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
-  name: 'id-Forstsee-Hackathon-Team-7'
+  name: 'id-forstsee-hackathon-team-7'
 }
 
 // Container App Setup
