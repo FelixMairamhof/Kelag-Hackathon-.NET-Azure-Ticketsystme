@@ -1,0 +1,21 @@
+﻿@page "/Create"
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<label for="issue">Enter the issue:</label>
+<input type="text" id="issue" name="issue" @bind="Issue" />
+
+
+<button type="submit" @onclick="sendData">Send</button>
+
+@code {
+private string Issue { get; set; }
+
+
+private void sendData()
+{
+Console.WriteLine(Issue);
+}
+}

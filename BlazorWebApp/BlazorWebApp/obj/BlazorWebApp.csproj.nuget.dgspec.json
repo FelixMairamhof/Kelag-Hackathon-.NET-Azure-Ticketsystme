@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\BlazorWebApp.csproj": {}
+    "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\BlazorWebApp.csproj": {}
   },
   "projects": {
-    "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\BlazorWebApp.csproj": {
+    "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\BlazorWebApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\BlazorWebApp.csproj",
+        "projectUniqueName": "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\BlazorWebApp.csproj",
         "projectName": "BlazorWebApp",
-        "projectPath": "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\BlazorWebApp.csproj",
-        "packagesPath": "C:\\Users\\feber\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\obj\\",
+        "projectPath": "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\BlazorWebApp.csproj",
+        "packagesPath": "C:\\Users\\Jonah\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\feber\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\Jonah\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
