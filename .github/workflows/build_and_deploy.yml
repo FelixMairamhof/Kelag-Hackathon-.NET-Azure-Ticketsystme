@@ -1,0 +1,78 @@
+name: Build and deploy container image to azure
+
+# Führt die Pipeline jedes mal aus, wenn eine Änderung in den main-Branch gepushed wird oder manuell über das GitHub-UI ausgelöst wird.
+on: 
+  push: 
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  APP_NAME: ${{ github.event.repository.name }}
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+
+# Notwendige Berechtigungen für den GitHub Token - darf erweitert werden, jedoch nicht reduziert.
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Source Code aus dem Repository holen
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      # Authentifizierung der Pipeline mit GitHub Package Registry
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # .NET Applikation bauen und in einen OCI Container packen
+      # Die .NET Applikation soll innerhalb eines Containers gebaut werden (2-stage build)
+      - name: Build and push container image
+        uses: docker/build-push-action@v5
+        with:
+          file: ./DockerFile/build_and_deploy #Pfad zum Dockerfile (relativ zum Repository-Root, bspw. ./MyNetApp/MyDockerfile)
+          context: ./DockerFile # TODO: Pfad zum Build-Context (relativ zum Repository-Root, bspw. ./MyNetApp)
+          push: true
+          tags: | #<repository-name> durch den Namen des GitHub-Repositories ersetzen
+            ghcr.io/kelag-hackathon-24/Kelag-Hackathon-2024-Team-7:${{ github.sha }}
+            ghcr.io/kelag-hackathon-24/Kelag-Hackathon-2024-Team-7:${{ github.head_ref || github.ref_name }}
+
+  deploy-to-azure:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    environment: azure
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Login in Azure wurde bereits konfiguriert - keine Änderungen notwendig
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.azure_client_id }}
+          tenant-id: ${{ secrets.azure_tenant_id }}
+          subscription-id:  ${{ secrets.azure_subscription_id }}
+
+      # Ressourcen in Azure werden über Bicep definiert und mit der Azure CLI provisioniert
+      - name: Provision Azure resources
+        shell: bash
+        run: | # TODO: <repository-resource-group-name> durch den Resource Group Namen ersetzen und sicherstellen, dass das main-dev.bicepparam-File existiert
+          az account show
+          az deployment group create \
+            --name gh-deployment-${{ env.APP_NAME }}-${{ env.BRANCH_NAME }} \
+            --resource-group rg-Forstsee-Hackathon-Team-7 \
+            --parameters ./infrastructure/main-dev.bicepparam
+        env: # GH_TOKEN und USERNAME sind bereits konfiguriert - keine Änderung vornehmen
+          GH_TOKEN: ${{ secrets.GH_PACKAGES_PAT }}
+          USERNAME: ${{ secrets.GH_PACKAGES_PAT_USER }}
