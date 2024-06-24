@@ -40,7 +40,7 @@ jobs:
       - name: Build and push container image
         uses: docker/build-push-action@v5
         with:
-          file: ./DockerFile/MyDockerFile #Pfad zum Dockerfile (relativ zum Repository-Root, bspw. ./MyNetApp/MyDockerfile)
+          file: ./DockerFile/DockerFile #Pfad zum Dockerfile (relativ zum Repository-Root, bspw. ./MyNetApp/MyDockerfile)
           context: ./DockerFile # TODO: Pfad zum Build-Context (relativ zum Repository-Root, bspw. ./MyNetApp)
           push: true
           tags: | #<repository-name> durch den Namen des GitHub-Repositories ersetzen
