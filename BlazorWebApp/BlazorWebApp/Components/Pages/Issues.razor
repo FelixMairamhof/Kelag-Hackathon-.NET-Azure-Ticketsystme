@@ -1,67 +1,65 @@
 ﻿@page "/issues"
-@attribute [StreamRendering]
+@page "/github-issues"
+@using System.Net.Http.Headers
+@using System.Text
+@using System.Text.Json
+@using System.Text.Json.Serialization
 
-<PageTitle>Weather</PageTitle>
+<h1>GitHub Issues</h1>
 
-<h1>Weather</h1>
-
-<p>This component demonstrates showing data.</p>
-
-@if (forecasts == null)
-{
-    <p>
-        <em>Loading...</em>
-    </p>
-}
-else
-{
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Date</th>
-            <th>Temp. (C)</th>
-            <th>Temp. (F)</th>
-            <th>Summary</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var forecast in forecasts)
-        {
-            <tr>
-                <td>@forecast.Date.ToShortDateString()</td>
-                <td>@forecast.TemperatureC</td>
-                <td>@forecast.TemperatureF</td>
-                <td>@forecast.Summary</td>
-            </tr>
-        }
-        </tbody>
-    </table>
-}
+<ul>
+    @foreach (var issue in Issuess)
+    {
+        <li>@issue.Title</li>
+    }
+</ul>
 
 @code {
-    private WeatherForecast[]? forecasts;
+    private List<GithubIssue> Issuess { get; set; } = new List<GithubIssue>();
+    String name = "123test123";
+    
 
     protected override async Task OnInitializedAsync()
     {
-        // Simulate asynchronous loading to demonstrate streaming rendering
-        await Task.Delay(500);
-
-        var startDate = DateOnly.FromDateTime(DateTime.Now);
-        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
-        forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        {
-            Date = startDate.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = summaries[Random.Shared.Next(summaries.Length)]
-        }).ToArray();
+        await MakeRequest();
     }
 
-    private class WeatherForecast
+    private async Task MakeRequest()
     {
-        public DateOnly Date { get; set; }
-        public int TemperatureC { get; set; }
-        public string? Summary { get; set; }
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+        var client = new HttpClient();
+
+        // Request headers
+        client.DefaultRequestHeaders.CacheControl = CacheControlHeaderValue.Parse("no-cache");
+        client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", "31ed80b9e6264b81b70c8abed0a7d156");
+
+        var uri = "https://apim-forstsee-hackathon.azure-api.net/github/Kelag-Hackathon-2024-Team-7/issues";
+
+        var issue = new
+        {
+            title = "My New Issue",
+            body = "This is the body of my new issue",
+            labels = new[] { "Label1", "label2" }
+        };
+
+        // Serialize the JSON object to a string
+        var json = JsonSerializer.Serialize(issue, new JsonSerializerOptions { WriteIndented = true });
+
+        using (var content = new StringContent(json, Encoding.UTF8, "application/json"))
+        {
+            HttpResponseMessage response = await client.PostAsync(uri, content);
+            Console.WriteLine(response);
+        }
     }
 
+    public class GithubIssue
+    {
+        [JsonPropertyName("title")]
+        public string Title { get; set; }
+
+        [JsonPropertyName("body")]
+        public string Body { get; set; }
+
+        [JsonPropertyName("labels")]
+        public string Labels { get; set; }
+    }
 }

@@ -28,11 +28,11 @@
     public async void sendData()
     {
         Console.WriteLine(issue);
-        var requestBody = new { prompt ="Now you got an issue description. You should split the description into ISSUE TYPE, SUMMARY, SERVICE NAME, GOOD DESCRIPTION and the PROMPT DESCRIPTION: " +  issue };
+        var requestBody = new { prompt = issue };
         var json = JsonSerializer.Serialize(requestBody);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
         client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", "31ed80b9e6264b81b70c8abed0a7d156");
-        var response = await client.PostAsync("https://apim-forstsee-hackathon.azure-api.net/openai/gpt35/completion", content);
+        var response = await client.PostAsync("https://kickets7251834894.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-02-01 ", content);
         var responseString = await response.Content.ReadAsStringAsync();
         Console.WriteLine(responseString);
     }
