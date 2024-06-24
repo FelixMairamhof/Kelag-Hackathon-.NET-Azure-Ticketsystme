@@ -1,6 +1,8 @@
 ﻿@page "/Create"
 @using System.Text
 @using System.Text.Json
+@using System.Text.Json.Serialization
+@using System.Net.Http.Headers
 @rendermode InteractiveServer
 
 
@@ -23,19 +25,75 @@
     private static readonly HttpClient client = new HttpClient();
 
 
-
-
-    public async void sendData()
+    private async void sendData()
     {
         Console.WriteLine(issue);
         var requestBody = new { prompt = issue };
         var json = JsonSerializer.Serialize(requestBody);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
         client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", "31ed80b9e6264b81b70c8abed0a7d156");
-        var response = await client.PostAsync("https://kickets7251834894.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-02-01 ", content);
+        var response = await client.PostAsync("https://apim-forstsee-hackathon.azure-api.net/openai/gpt35/completion"
+            , content);
         var responseString = await response.Content.ReadAsStringAsync();
+        var issueData = new GitHubIssueGIT();
+        issueData.Labels =new [] {"Label1","Label2","Label3","Label4"};
+        issueData.Title = "title1";
+        issueData.body = "Body";
+        MakeRequest(issueData);
+        Console.WriteLine("----------------------------------------------------------------------");
+        
         Console.WriteLine(responseString);
     }
 
+    private static async Task MakeRequest(GitHubIssueGIT issueData)
+    {
+        Console.WriteLine("53");
+        Console.WriteLine(issueData);
+
+        // Request headers
+        client.DefaultRequestHeaders.CacheControl = CacheControlHeaderValue.Parse("no-cache");
+        client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", "31ed80b9e6264b81b70c8abed0a7d156");
+        
+        var uri = "https://apim-forstsee-hackathon.azure-api.net/github/Kelag-Hackathon-2024-Team-7/issues";
+        // Serialize the JSON object to a string
+        var json = JsonSerializer.Serialize(issueData, new JsonSerializerOptions { WriteIndented = true });
+        Console.WriteLine(json);
+
+        using (var content = new StringContent(json, Encoding.UTF8, "application/json"))
+        {
+            HttpResponseMessage response = await client.PostAsync(uri, content);
+            Console.WriteLine(response);
+        }
+    }
+    
+    public class GitHubIssueDB
+    {
+        [JsonPropertyName("title")]
+        public string title { get; set; }
+        
+        [JsonPropertyName("description")]
+        public string description { get; set; }
+        
+        [JsonPropertyName("service-name")]
+        public string serviceName { get; set; }
+        
+        [JsonPropertyName("labels")]
+        public string[] labels { get; set; }
+
+        public override string ToString()
+        {
+            return $"Title: {title}, Description: {description}, Service Name: {serviceName}, Labels: {string.Join(", ", labels)}";
+        }
+    }
+    public class GitHubIssueGIT
+    {
+        [JsonPropertyName("title")]
+        public string Title { get; set; }
+        
+        [JsonPropertyName("body")]
+        public string body { get; set; }
+        
+        [JsonPropertyName("labels")]
+        public string[] Labels { get; set; }
+    }
 }
-   
