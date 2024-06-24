@@ -73,7 +73,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
           value: registryToken
         }
         {
-          name: 'keyvault-secret'
+          name: 'hackthonDbConnection'
           keyVaultUrl: 'https://kv-forstsee-hackathon.vault.azure.net/secrets/hackthonDbConnection/0982866f102b48cebcc8442af89dc087'
           identity: managedIdentity.id
         }
@@ -94,7 +94,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
           env: [
             {
               name: 'keyvaultsecret'
-              secretRef: 'keyvault-secret'
+              secretRef: 'hackthonDbConnection'
             }
           ]
         }
