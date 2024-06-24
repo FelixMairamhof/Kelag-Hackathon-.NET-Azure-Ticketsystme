@@ -40,8 +40,8 @@ jobs:
       - name: Build and push container image
         uses: docker/build-push-action@v5
         with:
-          file: ./DockerFile/Dockerfile #Pfad zum Dockerfile (relativ zum Repository-Root, bspw. ./MyNetApp/MyDockerfile)
-          context: ./DockerFile # TODO: Pfad zum Build-Context (relativ zum Repository-Root, bspw. ./MyNetApp)
+          file: ./BlazorWebApp/DockerFile/Dockerfile #Pfad zum Dockerfile (relativ zum Repository-Root, bspw. ./MyNetApp/MyDockerfile)
+          context: ./BlazorWebApp/DockerFile # TODO: Pfad zum Build-Context (relativ zum Repository-Root, bspw. ./MyNetApp)
           push: true
           tags: | #<repository-name> durch den Namen des GitHub-Repositories ersetzen
             ghcr.io/kelag-hackathon-24/kelag-hackathon-2024-team-7:${{ github.sha }}
