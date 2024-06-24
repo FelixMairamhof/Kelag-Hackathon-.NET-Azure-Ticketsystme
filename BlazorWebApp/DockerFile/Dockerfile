@@ -7,8 +7,8 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["/BlazorWebApp/BlazorWebApp.csproj", "BlazorWebApp/"]
-RUN dotnet restore "BlazorWebApp/BlazorWebApp.csproj"
+COPY ["./BlazorWebApp/BlazorWebApp/BlazorWebApp.csproj", "BlazorWebApp/"]
+RUN dotnet restore "./BlazorWebApp/BlazorWebApp/BlazorWebApp.csproj"
 COPY . .
 WORKDIR "/src/BlazorWebApp"
 RUN dotnet build "BlazorWebApp.csproj" -c $BUILD_CONFIGURATION -o /app/build
