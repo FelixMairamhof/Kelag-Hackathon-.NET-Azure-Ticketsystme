@@ -1,6 +1,7 @@
 ﻿@page "/Create"
 @using System.Text
 @using System.Text.Json
+@using Microsoft.Data.SqlClient
 @rendermode InteractiveServer
 
 
@@ -34,8 +35,40 @@
         client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", "31ed80b9e6264b81b70c8abed0a7d156");
         var response = await client.PostAsync("https://kickets7251834894.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-02-01 ", content);
         var responseString = await response.Content.ReadAsStringAsync();
+        
         Console.WriteLine(responseString);
+        
+        string connectionString = "Server=tcp:issues-server-db.database.windows.net,1433;Initial Catalog=issues;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=\"Active Directory Default\"";
+
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            connection.Open();
+
+            // Create table if it doesn't exist
+            SqlCommand createTableCommand = new SqlCommand(@"IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Issues')
+                                                            CREATE TABLE Issues (
+                                                                Id INT IDENTITY(1,1) PRIMARY KEY,
+                                                                Title NVARCHAR(50),
+                                                                Description NVARCHAR(200),
+                                                                ServiceName NVARCHAR(50),
+                                                                Label NVARCHAR(50)
+                                                            );", connection);
+            createTableCommand.ExecuteNonQuery();
+
+            // Insert values into the table
+            SqlCommand insertCommand = new SqlCommand(@"INSERT INTO Issues (Title, Description, ServiceName, Label) 
+                                                        VALUES (@title, @description, @serviceName, @label);", connection);
+            insertCommand.Parameters.AddWithValue("@title", "Issue Title");
+            insertCommand.Parameters.AddWithValue("@description", issue);
+            insertCommand.Parameters.AddWithValue("@serviceName", "Service Name");
+            insertCommand.Parameters.AddWithValue("@label", "Label");
+            insertCommand.ExecuteNonQuery();
+
+            connection.Close();
+        }
     }
 
+    
+    
+
 }
-   
