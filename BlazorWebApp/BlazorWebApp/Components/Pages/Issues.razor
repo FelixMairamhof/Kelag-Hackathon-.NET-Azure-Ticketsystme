@@ -1,22 +1,88 @@
 ﻿@page "/issues"
 @page "/github-issues"
+@using System.Collections
 @using System.Net.Http.Headers
 @using System.Text
 @using System.Text.Json
 @using System.Text.Json.Serialization
+@using Microsoft.Data.SqlClient
 
 <h1>GitHub Issues</h1>
 
 <ul>
-    
+    @foreach (DbIssue issue in (ArrayList)list)
+    {
+    <li>
+        Title: @issue.title
+        Description: @issue.description
+        Service Name: @issue.serviceName
+        Labels: @string.Join(", ", issue.labels)
+    </li>
+    }
 </ul>
-
 @code {
+    private string title;
+    private string description;
+    private string serviceName;
+    private string [] labels;
+    private ArrayList list;
     
     protected override async Task OnInitializedAsync()
     {
-        
+        string connectionString = "Server=tcp:issues-db.database.windows.net,1433;Initial Catalog=issues-db;Persist Security Info=False;User ID=AdminDB;Password=BauerDieMauer1!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
+        list = new ArrayList();
+        try
+        {
+            using (var conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                
+                var command = new SqlCommand("SELECT * FROM Issues", conn);
+                using SqlDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    title =(string) reader[0];
+                    description = (string) reader[1];
+                    serviceName = (string)reader[2];
+
+                    
+                   
+                    labels = ((string)reader[3]).Split(';');
+                    DbIssue issue = new DbIssue(title, description, serviceName, labels);
+                    list.Add(issue);
+                    Console.WriteLine(issue.ToString());
+                    
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            // Table may already exist
+            Console.WriteLine(e.Message);
+        }
     }
 
-   
+    public class DbIssue
+    {
+        [JsonPropertyName("title")] public string title { get; set; }
+
+        [JsonPropertyName("description")] public string description { get; set; }
+
+        [JsonPropertyName("service-name")] public string serviceName { get; set; }
+
+        [JsonPropertyName("labels")] public string[] labels { get; set; }
+
+        public override string ToString()
+        {
+            return $"Title: {title}, Description: {description}, Service Name: {serviceName}, Labels: {string.Join(", ", labels)}";
+        }
+
+        public DbIssue(string title,string description, string serviceName, string [] labels)
+        {
+            this.title = title;
+            this.description = description;
+            this.serviceName = serviceName;
+            this.labels = labels;
+        }
+    }
 }
