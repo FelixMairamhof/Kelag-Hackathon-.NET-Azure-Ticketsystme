@@ -87,6 +87,16 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
           keyVaultUrl: 'https://db-keyvault-team7.vault.azure.net/secrets/db-keysecret/eda5f91d03b94eb581bce8b753182f9d'
           identity: managedIdentity.id
         }
+        {
+          name: 'keyvaultopenai'
+          keyVaultUrl: 'https://db-keyvault-team7.vault.azure.net/secrets/openai-key/5e3f71c9df8e4716a6d0c502b20d70d4'
+          identity: managedIdentity.id
+        }
+        {
+          name: 'aikeysecret'
+          keyVaultUrl: 'https://db-keyvault-team7.vault.azure.net/secrets/db-blueml-key/8600f417f2874d14bfdab65e0c61cfa1'
+          identity: managedIdentity.id
+        }
       ]
       registries: [
         {
@@ -109,6 +119,14 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
             {
               name: 'keyvaultteam7env'
               secretRef: 'keyvaultsecretteam7'
+            }
+            {
+              name: 'apikeyllm'
+              secretRef: 'keyvaultopenai'
+            }
+            {
+              name: 'aidbkey'
+              secretRef: 'aikeysecret'
             }
           ]
         }   
