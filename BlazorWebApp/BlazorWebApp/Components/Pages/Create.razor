@@ -6,6 +6,7 @@
 @using Azure
 @using System
 @using System.Data
+@using Microsoft.AspNetCore.Authentication
 @using Microsoft.Data.SqlClient
 
 @rendermode InteractiveServer
@@ -16,18 +17,19 @@
 
 <label for="issue">Enter the issue:</label>
 <input type="text" id="issue" name="issue" @bind="issue" />
+<h1>Secret: @a</h1>
 
 <button type="submit" @onclick="SendData">Send</button>
 @code {
     private string issue;
     private static readonly HttpClient client = new HttpClient();
-    
+
     // LLM values
-    private string a = System.Environment.GetEnvironmentVariable("");
-    
-    private string ApiKey = "f145425b32e24cef94705f19efd1d74a";
-    private string Endpoint = "https://kickets7251834894.openai.azure.com/";
-    private string DeploymentId = "gpt-35-turbo-1106-kelag-kickets";
+    private string a = System.Environment.GetEnvironmentVariable("apikeyllm");
+    private readonly IWebHostEnvironment _env;
+    private string ApiKey = "e323124e397b4928bb4d26f704cb1447";
+    private string Endpoint = "https://kickets-more.openai.azure.com/";
+    private string DeploymentId = "gpt-4-0613-kickets-kelag";
     private string ApiVersion = "2024-02-01";
     private double Temperature = 0.5;
 
@@ -57,9 +59,13 @@
 
     private async Task SendData()
     {
+
+        Console.WriteLine("Enviroment" + Environment.GetEnvironmentVariable(""));
         Console.WriteLine(issue);
+        Console.WriteLine("63: " + Environment.GetEnvironmentVariable("APIKEY"));
         client.DefaultRequestHeaders.Clear();
         client.DefaultRequestHeaders.Add("api-key", ApiKey);
+
 
         var json_data = new
         {
@@ -71,7 +77,7 @@
             max_tokens = 500,
             temperature = Temperature
         };
-         
+
 
         var json = JsonSerializer.Serialize(json_data);
         var content = new StringContent(json, Encoding.UTF8, "application/json"); // Here 'Content-Type' is correctly set
@@ -85,7 +91,7 @@
         }
 
         var responseContent = await response.Content.ReadAsStringAsync();
-        Console.WriteLine("ResponseContent: "+responseContent);
+        Console.WriteLine("ResponseContent: " + responseContent);
         try
         {
             JsonDocument jsonDoc = JsonDocument.Parse(responseContent);
@@ -96,12 +102,16 @@
                 return;
             }
 
+            Console.WriteLine("102");
+
             JsonElement firstChoice = choicesArray.EnumerateArray().First();
             JsonElement messageElement;
             if (!(firstChoice.TryGetProperty("message", out messageElement)))
             {
                 return;
             }
+
+            Console.WriteLine("110");
 
             if (!(messageElement.ValueKind == JsonValueKind.Object))
             {
@@ -115,15 +125,23 @@
             JsonElement contentElement = root1.GetProperty("content");
 
             // Parse the content string as a separate JSON document
-            JsonDocument innerDoc = JsonDocument.Parse(contentElement.GetString());
+            Console.WriteLine("124");
+
+            var temp = contentElement.GetString().Replace("'", "\"");
+            JsonDocument innerDoc = JsonDocument.Parse(temp);
+            Console.WriteLine("27");
+
             JsonElement innerRoot = innerDoc.RootElement;
+            Console.WriteLine("130");
+
 
             string title = innerRoot.GetProperty("title").GetString();
+            Console.WriteLine($"Title: {title}");
+
             string description = innerRoot.GetProperty("description").GetString();
             string serviceName = innerRoot.GetProperty("service Name").GetString();
             string[] labels = innerRoot.GetProperty("labels").EnumerateArray().Select(l => l.GetString()).ToArray();
 
-            Console.WriteLine($"Title: {title}");
             Console.WriteLine($"Description: {description}");
             Console.WriteLine($"Service Name: {serviceName}");
             Console.WriteLine($"Labels: {string.Join(", ", labels)}");
@@ -146,7 +164,8 @@
                     int count = (int)await command.ExecuteScalarAsync();
 
                     if (count == 0)
-                    { //No Duplicate
+                    {
+                        //No Duplicate
                         Console.WriteLine("No DUplicate");
                         command = new SqlCommand(
                             "INSERT INTO Issues (title, description, service, labels) VALUES (@title,@description,@service,@labels);",
@@ -171,7 +190,7 @@
                         command.Parameters.AddWithValue("@service", dbIssue.serviceName);
                         command.Parameters.AddWithValue("@labels", string.Join(';', dbIssue.labels));
                         command.ExecuteNonQuery();
-                        
+
                     }
                 }
             }
@@ -179,13 +198,13 @@
             {
                 Console.WriteLine(e.Message);
             }
-            
+
             //To Github
             GitIssue githubIssue = DbIssueToGitIssue(dbIssue);
             Console.WriteLine("GitIssue: " + githubIssue);
             await MakeRequest(githubIssue);
 
-            
+
         }
         catch (Exception ex)
         {
@@ -197,7 +216,7 @@
 
 
     }
-    
+
     private static async Task MakeRequest(GitIssue issueData)
     {
         Console.WriteLine("53");
@@ -229,7 +248,7 @@
 
         [JsonPropertyName("labels")] public string[] labels { get; set; }
 
-     //   public override string ToString() { return $"Title: {title}, Description: {description}, Service Name: {serviceName}, Labels: {string.Join(", ", labels)}"; }
+        //   public override string ToString() { return $"Title: {title}, Description: {description}, Service Name: {serviceName}, Labels: {string.Join(", ", labels)}"; }
     }
 
     public static GitIssue DbIssueToGitIssue(DbIssue dbIssue)
@@ -240,7 +259,7 @@
         a.Title = dbIssue.title;
         return a;
     }
-    
+
     public static DbIssue GitIssueToDbIssue(GitIssue gitIssue)
     {
         DbIssue a = new DbIssue();
@@ -257,6 +276,7 @@
         [JsonPropertyName("body")] public string body { get; set; }
 
         [JsonPropertyName("labels")] public string[] Labels { get; set; }
+
     }
 
 }
