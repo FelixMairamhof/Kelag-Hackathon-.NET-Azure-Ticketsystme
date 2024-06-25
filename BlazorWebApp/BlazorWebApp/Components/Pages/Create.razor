@@ -17,7 +17,6 @@
 
 <label for="issue">Enter the issue:</label>
 <input type="text" id="issue" name="issue" @bind="issue" />
-<h1>Secret: @a</h1>
 
 <button type="submit" @onclick="SendData">Send</button>
 @code {
@@ -25,7 +24,6 @@
     private static readonly HttpClient client = new HttpClient();
 
     // LLM values
-    private string a = System.Environment.GetEnvironmentVariable("apikeyllm");
     private readonly IWebHostEnvironment _env;
     private string ApiKey = "e323124e397b4928bb4d26f704cb1447";
     private string Endpoint = "https://kickets-more.openai.azure.com/";

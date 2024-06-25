@@ -9,7 +9,8 @@ main[b-r215xwi2mi] {
 }
 
 .sidebar[b-r215xwi2mi] {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    background: #E63946;
+    color: #E63946;
 }
 
 .top-row[b-r215xwi2mi] {
