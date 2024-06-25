@@ -26,36 +26,16 @@
 
     // LLM values
     private readonly IWebHostEnvironment _env;
-    private string ApiKey = "e323124e397b4928bb4d26f704cb1447";
-    private string Endpoint = "https://kickets-more.openai.azure.com/";
-    private string DeploymentId = "gpt-4-0613-kickets-kelag";
-    private string ApiVersion = "2024-02-01";
-    private double Temperature = 0.5;
-
-    private string SystemPrompt = @"To effectively generate structured JSON responses for IT issue tracking in English, ensure adherence to specific label constraints provided. Follow this method:
+    private static string[] keys = System.Environment.GetEnvironmentVariable("aidbkeynew").Split(';');
     
-    1. Understand and Analyze the Input:
-       - Read the user input carefully to extract essential details such as the type of issue, specific system involved, and the nature of the problem. Base your understanding strictly on the information provided in the input.
+    private static string ApiKey = keys[0];
+    private static string Endpoint = keys[1];
+    private static string DeploymentId = keys[2];
+    private static string ApiVersion = keys[3];
+    private static string SystemPrompt = keys[4];
 
-    2. Construct a Structured Response:
-       - title: Create a concise title that captures the main issue along with specifics about the system affected and any relevant identification numbers. Ensure all text is in English.
-       - labels: Choose labels only from the predefined set that best fit the context of the issue. The labels available are [bug, documentation, duplicate, enhancement, good first issue, help wanted, invalid, question, wontfix]. Select those that most accurately describe the category and urgency of the issue.
-       - service Name: English only: State clearly the service or system impacted, including any identifiers or codes, ensuring all text is in English only in English.
-       - description: Write a detailed description of the problem in English only in English, starting with a clear statement of the main issue followed by directives for needed actions. Highlight the urgency and importance of resolving the issue to maintain smooth operations.
-
-    3. Format the JSON Output:
-       - The output should be a JSON object with clearly defined keys: 'title', 'labels', 'service Name', and 'description'. Each key must contain information accurately derived from the user's input and formatted clearly in English.
-
-    Example JSON Output for Training:
-    {
-      'title': 'Account Locked in Active Directory (BKS-System) (TISC-53699)',
-      'labels': ['bug', 'help wanted', ....],
-      'service Name': 'Active Directory (BKS-System) (TISC-53699)',
-      'description': 'Problem: Account locked. Please thoroughly check the system and take necessary actions to resolve the issue. It is crucial that this problem is resolved promptly and efficiently to ensure smooth operation.'
-    }
-
-    Ensure every word is in English!!! Only English!!!";
-
+    private double Temperature = 0.5;
+    
     private async Task SendData()
     {
 
