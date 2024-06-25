@@ -97,6 +97,11 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
           keyVaultUrl: 'https://db-keyvault-team7.vault.azure.net/secrets/db-blueml-key/8600f417f2874d14bfdab65e0c61cfa1'
           identity: managedIdentity.id
         }
+        {
+          name: 'aikeysecretnew'
+          keyVaultUrl: 'https://db-keyvault-team7.vault.azure.net/secrets/db-blueml-key-new/7aa8d5c715814c6ca4361674e5754179'
+          identity: managedIdentity.id
+        }
       ]
       registries: [
         {
@@ -127,6 +132,10 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
             {
               name: 'aidbkey'
               secretRef: 'aikeysecret'
+            }
+            {
+              name: 'aidbkeynew'
+              secreRef: 'aikeysecretnew'
             }
           ]
         }   
