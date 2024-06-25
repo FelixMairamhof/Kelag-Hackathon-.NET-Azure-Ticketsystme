@@ -3,7 +3,11 @@
 @using System.Text.Json
 @using System.Net.Http.Headers
 @using System.Text.Json.Serialization
+@using Azure
+@using System
+@using System.Data
 @using Microsoft.Data.SqlClient
+
 @rendermode InteractiveServer
 
 <PageTitle>Create</PageTitle>
@@ -18,10 +22,12 @@
     private string issue;
     private static readonly HttpClient client = new HttpClient();
     
-    // Direkt angegebene Variablen
+    // LLM values
+    private string a = System.Environment.GetEnvironmentVariable("");
+    
     private string ApiKey = "f145425b32e24cef94705f19efd1d74a";
     private string Endpoint = "https://kickets7251834894.openai.azure.com/";
-    private string DeploymentId = "gpt-35-turbo";
+    private string DeploymentId = "gpt-35-turbo-1106-kelag-kickets";
     private string ApiVersion = "2024-02-01";
     private double Temperature = 0.5;
 
@@ -42,7 +48,7 @@
     Example JSON Output for Training:
     {
       'title': 'Account Locked in Active Directory (BKS-System) (TISC-53699)',
-      'labels': ['bug', 'help wanted'],
+      'labels': ['bug', 'help wanted', ....],
       'service Name': 'Active Directory (BKS-System) (TISC-53699)',
       'description': 'Problem: Account locked. Please thoroughly check the system and take necessary actions to resolve the issue. It is crucial that this problem is resolved promptly and efficiently to ensure smooth operation.'
     }
@@ -65,78 +71,131 @@
             max_tokens = 500,
             temperature = Temperature
         };
+         
 
         var json = JsonSerializer.Serialize(json_data);
         var content = new StringContent(json, Encoding.UTF8, "application/json"); // Here 'Content-Type' is correctly set
 
         var url = $"{Endpoint}openai/deployments/{DeploymentId}/chat/completions?api-version={ApiVersion}";
         var response = await client.PostAsync(url, content);
-       
-        if (response.IsSuccessStatusCode)
+
+        if (!response.IsSuccessStatusCode)
         {
-            var responseContent = await response.Content.ReadAsStringAsync();
-            Console.WriteLine("ResponseContent: "+responseContent);
+            return;
+        }
+
+        var responseContent = await response.Content.ReadAsStringAsync();
+        Console.WriteLine("ResponseContent: "+responseContent);
+        try
+        {
+            JsonDocument jsonDoc = JsonDocument.Parse(responseContent);
+            JsonElement root = jsonDoc.RootElement;
+            JsonElement choicesArray = root.GetProperty("choices");
+            if (!choicesArray.EnumerateArray().Any())
+            {
+                return;
+            }
+
+            JsonElement firstChoice = choicesArray.EnumerateArray().First();
+            JsonElement messageElement;
+            if (!(firstChoice.TryGetProperty("message", out messageElement)))
+            {
+                return;
+            }
+
+            if (!(messageElement.ValueKind == JsonValueKind.Object))
+            {
+                return;
+            }
+
+            // Process messageElement as an object
+            Console.WriteLine("92: " + messageElement);
+
+            JsonElement root1 = messageElement;
+            JsonElement contentElement = root1.GetProperty("content");
+
+            // Parse the content string as a separate JSON document
+            JsonDocument innerDoc = JsonDocument.Parse(contentElement.GetString());
+            JsonElement innerRoot = innerDoc.RootElement;
+
+            string title = innerRoot.GetProperty("title").GetString();
+            string description = innerRoot.GetProperty("description").GetString();
+            string serviceName = innerRoot.GetProperty("service Name").GetString();
+            string[] labels = innerRoot.GetProperty("labels").EnumerateArray().Select(l => l.GetString()).ToArray();
+
+            Console.WriteLine($"Title: {title}");
+            Console.WriteLine($"Description: {description}");
+            Console.WriteLine($"Service Name: {serviceName}");
+            Console.WriteLine($"Labels: {string.Join(", ", labels)}");
+            DbIssue dbIssue = new DbIssue();
+            dbIssue.description = description;
+            dbIssue.labels = labels;
+            dbIssue.title = title;
+            dbIssue.serviceName = serviceName;
+
+            //save to db
+            string connectionString = "Server=tcp:issues-db.database.windows.net,1433;Initial Catalog=issues-db;Persist Security Info=False;User ID=AdminDB;Password=BauerDieMauer1!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
             try
             {
-                JsonDocument jsonDoc = JsonDocument.Parse(responseContent);
-                JsonElement root = jsonDoc.RootElement;
-                JsonElement choicesArray = root.GetProperty("choices");
-                if (choicesArray.EnumerateArray().Any())
+                using (var conn = new SqlConnection(connectionString))
                 {
-                    JsonElement firstChoice = choicesArray.EnumerateArray().First();
-                    JsonElement messageElement;
-                    if (firstChoice.TryGetProperty("message", out messageElement))
+                    conn.Open();
+                    var command = new SqlCommand("SELECT COUNT(*) FROM Issues WHERE title LIKE @title", conn);
+                    command.Parameters.Add("@title", SqlDbType.Text).Value = "%" + dbIssue.title + "%";
+
+                    int count = (int)await command.ExecuteScalarAsync();
+
+                    if (count == 0)
+                    { //No Duplicate
+                        Console.WriteLine("No DUplicate");
+                        command = new SqlCommand(
+                            "INSERT INTO Issues (title, description, service, labels) VALUES (@title,@description,@service,@labels);",
+                            conn);
+                        command.Parameters.Add("@title", SqlDbType.Text).Value = dbIssue.title;
+                        command.Parameters.AddWithValue("@description", dbIssue.description);
+                        command.Parameters.AddWithValue("@service", dbIssue.serviceName);
+                        command.Parameters.AddWithValue("@labels", string.Join(';', dbIssue.labels));
+                        command.ExecuteNonQuery();
+                    }
+                    else
                     {
-                        if (messageElement.ValueKind == JsonValueKind.Object)
-                        {
-                            // Process messageElement as an object
-                            Console.WriteLine("92: " + messageElement);
-
-                            JsonElement root1 = messageElement;
-                            JsonElement contentElement = root1.GetProperty("content");
-
-                            // Parse the content string as a separate JSON document
-                            JsonDocument innerDoc = JsonDocument.Parse(contentElement.GetString());
-                            JsonElement innerRoot = innerDoc.RootElement;
-
-                            string title = innerRoot.GetProperty("title").GetString();
-                            string description = innerRoot.GetProperty("description").GetString();
-                            string serviceName = innerRoot.GetProperty("service Name").GetString();
-                            string[] labels = innerRoot.GetProperty("labels").EnumerateArray().Select(l => l.GetString()).ToArray();
-
-                            Console.WriteLine($"Title: {title}");
-                            Console.WriteLine($"Description: {description}");
-                            Console.WriteLine($"Service Name: {serviceName}");
-                            Console.WriteLine($"Labels: {string.Join(", ", labels)}");
-                            DbIssue dbIssue = new DbIssue();
-                            dbIssue.description = description;
-                            dbIssue.labels = labels;
-                            dbIssue.title = title;
-                            dbIssue.serviceName = serviceName;
-                            GitIssue a = DbIssueToGitIssue(dbIssue);
-                            Console.WriteLine("GitIssue: "+a);
-                            MakeRequest(a);
-                            
-                            //save to db
-                            await SaveToDatabase(dbIssue);
-                        }
-                        else
-                        {
-                            // Handle case where messageElement is not an object
-                            Console.WriteLine("Expected a JSON object, but found: " + messageElement.ValueKind.ToString());
-                        }
+                        //Is Duplicate
+                        Console.WriteLine("Duplicate");
+                        dbIssue.labels = dbIssue.labels.Concat(new[] { "duplicate" }).ToArray();
+                        Console.WriteLine(dbIssue.labels);
+                        command = new SqlCommand(
+                            "INSERT INTO Issues (title, description, service, labels) VALUES (@title,@description,@service,@labels);",
+                            conn);
+                        command.Parameters.Add("@title", SqlDbType.Text).Value = dbIssue.title;
+                        command.Parameters.AddWithValue("@description", dbIssue.description);
+                        command.Parameters.AddWithValue("@service", dbIssue.serviceName);
+                        command.Parameters.AddWithValue("@labels", string.Join(';', dbIssue.labels));
+                        command.ExecuteNonQuery();
+                        
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Console.WriteLine("Error parsing JSON: " + ex.Message);
+                Console.WriteLine(e.Message);
             }
+            
+            //To Github
+            GitIssue githubIssue = DbIssueToGitIssue(dbIssue);
+            Console.WriteLine("GitIssue: " + githubIssue);
+            await MakeRequest(githubIssue);
+
+            
         }
-        else
+        catch (Exception ex)
         {
-            throw new Exception($"Request failed with status code {response.StatusCode}: {response.ReasonPhrase}");
+            Console.WriteLine("Error parsing JSON: " + ex.Message);
         }
+
+
+
+
+
     }
     
     private static async Task MakeRequest(GitIssue issueData)
@@ -199,29 +258,5 @@
 
         [JsonPropertyName("labels")] public string[] Labels { get; set; }
     }
-    private async Task SaveToDatabase(DbIssue dbIssue)
-    {
-        string connectionString = "Server=tcp:issues-db.database.windows.net,1433;Initial Catalog=issues-db;Persist Security Info=False;User ID=AdminDB;Password=BauerDieMauer1!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
 
-        try
-        {
-            using (var conn = new SqlConnection(connectionString))
-            {
-                conn.Open();
-
-                var command = new SqlCommand(
-                    "INSERT INTO Issues (title, description, service, labels) VALUES (@title,@description,@service,@labels);",
-                    conn);
-                command.Parameters.AddWithValue("@title", dbIssue.title);
-                command.Parameters.AddWithValue("@description", dbIssue.description);
-                command.Parameters.AddWithValue("@service", dbIssue.serviceName);
-                command.Parameters.AddWithValue("@labels", string.Join(';', dbIssue.labels));
-                await command.ExecuteNonQueryAsync();
-            }
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-        }
-    }
 }

@@ -18,9 +18,9 @@ var containerAppEnvironmentName = take('caenv-${appName}-${postfix}', 32)
 var containerAppName = take('ca-${appName}-${postfix}', 32)
 var logAnalyticsWorkspaceName = take('logs-${appName}-${postfix}', 32)
 
-//resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
-//  name: 'id-forstsee-hackathon-team-7'
-//}
+resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
+  name: 'id-Forstsee-Hackathon-Team-7'
+}
 
 // Container App Setup
 // Create log analytics workspace for container app environment
@@ -53,7 +53,12 @@ resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2023-05-01' 
 resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
   name: containerAppName
   location: location
-
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${managedIdentity.id}': {}
+    }
+  }
   properties: {
     managedEnvironmentId: containerAppEnvironment.id
     configuration: {
@@ -72,11 +77,26 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
           name: 'github-token'
           value: registryToken
         }
-        //{
-        //  name: 'keyvaultsecret'
-        //  keyVaultUrl: 'https://kv-forstsee-hackathon.vault.azure.net/secrets/hackthonDbConnection/0982866f102b48cebcc8442af89dc087'
-        //  // identity: managedIdentity.id
-        //}
+        {
+          name: 'keyvaultsecretshared'
+          keyVaultUrl: 'https://kv-forstsee-hackathon.vault.azure.net/secrets/hackthonDbConnection/0982866f102b48cebcc8442af89dc087'
+          identity: managedIdentity.id
+        }
+        {
+          name: 'keyvaultsecretteam7'
+          keyVaultUrl: 'https://db-keyvault-team7.vault.azure.net/secrets/db-keysecret/eda5f91d03b94eb581bce8b753182f9d'
+          identity: managedIdentity.id
+        }
+        {
+          name: 'keyvaultopenai'
+          keyVaultUrl: 'https://db-keyvault-team7.vault.azure.net/secrets/openai-key/5e3f71c9df8e4716a6d0c502b20d70d4'
+          identity: managedIdentity.id
+        }
+        {
+          name: 'aikeysecret'
+          keyVaultUrl: 'https://db-keyvault-team7.vault.azure.net/secrets/db-blueml-key/8600f417f2874d14bfdab65e0c61cfa1'
+          identity: managedIdentity.id
+        }
       ]
       registries: [
         {
@@ -91,14 +111,27 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
         {
           name: containerAppName
           image: containerImageWithVersion
-          //env: [
-          //  {
-          //    name: 'keyvaultenv'
-          //    secretRef: 'keyvaultsecret'
-          //  }
+          env: [
+            {
+              name: 'keyvaultsharedenv'
+              secretRef: 'keyvaultsecretshared'
+            }
+            {
+              name: 'keyvaultteam7env'
+              secretRef: 'keyvaultsecretteam7'
+            }
+            {
+              name: 'apikeyllm'
+              secretRef: 'keyvaultopenai'
+            }
+            {
+              name: 'aidbkey'
+              secretRef: 'aikeysecret'
+            }
+          ]
         }   
-        ]
-      }
+      ]
+    }
   }
 }
 
