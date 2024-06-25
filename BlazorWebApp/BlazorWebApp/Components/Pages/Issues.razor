@@ -29,7 +29,7 @@
     
     protected override async Task OnInitializedAsync()
     {
-        string connectionString = "Server=tcp:issues-db.database.windows.net,1433;Initial Catalog=issues-db;Persist Security Info=False;User ID=AdminDB;Password=BauerDieMauer1!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
+        string connectionString = System.Environment.GetEnvironmentVariable("keyvaultteam7env");
         list = new ArrayList();
         try
         {
