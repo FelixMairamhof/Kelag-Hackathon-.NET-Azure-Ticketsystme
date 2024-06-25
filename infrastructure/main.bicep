@@ -54,9 +54,9 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
   name: containerAppName
   location: location
   identity: {
-    type: 'string'
+    type: 'UserAssigned'
     userAssignedIdentities: {
-      {customized property}: {}
+      '${managedIdentity.id}': {}
     }
   }
   properties: {
@@ -78,8 +78,13 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
           value: registryToken
         }
         {
-          name: 'keyvaultsecret'
+          name: 'keyvaultsecretshared'
           keyVaultUrl: 'https://kv-forstsee-hackathon.vault.azure.net/secrets/hackthonDbConnection/0982866f102b48cebcc8442af89dc087'
+          identity: managedIdentity.id
+        }
+        {
+          name: 'keyvaultsecretteam7'
+          keyVaultUrl: 'https://db-keyvault-team7.vault.azure.net/secrets/db-keysecret/eda5f91d03b94eb581bce8b753182f9d'
           identity: managedIdentity.id
         }
       ]
@@ -98,8 +103,12 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
           image: containerImageWithVersion
           env: [
             {
-              name: 'keyvaultenv'
-              secretRef: 'keyvaultsecret'
+              name: 'keyvaultsharedenv'
+              secretRef: 'keyvaultsecretshared'
+            }
+            {
+              name: 'keyvaultteam7env'
+              secretRef: 'keyvaultsecretteam7'
             }
           ]
         }   
