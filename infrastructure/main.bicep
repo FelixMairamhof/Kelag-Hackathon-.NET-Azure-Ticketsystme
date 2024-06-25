@@ -18,9 +18,9 @@ var containerAppEnvironmentName = take('caenv-${appName}-${postfix}', 32)
 var containerAppName = take('ca-${appName}-${postfix}', 32)
 var logAnalyticsWorkspaceName = take('logs-${appName}-${postfix}', 32)
 
-resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
-  name: 'id-Forstsee-Hackathon-Team-7'
-}
+//resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
+//  name: 'id-forstsee-hackathon-team-7'
+//}
 
 // Container App Setup
 // Create log analytics workspace for container app environment
@@ -72,11 +72,11 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
           name: 'github-token'
           value: registryToken
         }
-        {
-          name: 'keyvault-secret'
-          keyVaultUrl: 'https://kv-forstsee-hackathon.vault.azure.net/secrets/hackthonDbConnection/0982866f102b48cebcc8442af89dc087'
-          identity: managedIdentity.id
-        }
+        //{
+        //  name: 'keyvaultsecret'
+        //  keyVaultUrl: 'https://kv-forstsee-hackathon.vault.azure.net/secrets/hackthonDbConnection/0982866f102b48cebcc8442af89dc087'
+        //  // identity: managedIdentity.id
+        //}
       ]
       registries: [
         {
@@ -91,15 +91,14 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
         {
           name: containerAppName
           image: containerImageWithVersion
-          env: [
-            {
-              name: 'keyvaultsecret'
-              secretRef: 'keyvault-secret'
-            }
-          ]
-        }
-      ]
-    }
+          //env: [
+          //  {
+          //    name: 'keyvaultenv'
+          //    secretRef: 'keyvaultsecret'
+          //  }
+        }   
+        ]
+      }
   }
 }
 
