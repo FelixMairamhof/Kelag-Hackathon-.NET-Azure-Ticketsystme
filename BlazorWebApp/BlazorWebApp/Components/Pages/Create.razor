@@ -1,10 +1,9 @@
 ﻿@page "/Create"
 @using System.Text
 @using System.Text.Json
-@using Microsoft.Data.SqlClient
+@using System.Net.Http.Headers
+@using System.Text.Json.Serialization
 @rendermode InteractiveServer
-
-
 
 <PageTitle>Create</PageTitle>
 
@@ -13,62 +12,139 @@
 <label for="issue">Enter the issue:</label>
 <input type="text" id="issue" name="issue" @bind="issue" />
 
-
-<button type="submit" @onclick="sendData">Send</button>
-
-
-
+<button type="submit" @onclick="SendData">Send</button>
 @code {
-
     private string issue;
     private static readonly HttpClient client = new HttpClient();
 
+    // Direkt angegebene Variablen
+    private string ApiKey = "f145425b32e24cef94705f19efd1d74a";
+    private string Endpoint = "https://kickets7251834894.openai.azure.com/";
+    private string DeploymentId = "gpt-35-turbo-1106-kelag-kickets";
+    private string ApiVersion = "2024-02-01";
+    private double Temperature = 0.5;
+    private string SystemPrompt = @"To effectively generate structured JSON responses for IT issue tracking in English, ensure adherence to specific label constraints provided. Follow this method:
+    
+    1. Understand and Analyze the Input:
+       - Read the user input carefully to extract essential details such as the type of issue, specific system involved, and the nature of the problem. Base your understanding strictly on the information provided in the input.
 
+    2. Construct a Structured Response:
+       - title: Create a concise title that captures the main issue along with specifics about the system affected and any relevant identification numbers. Ensure all text is in English.
+       - labels: Choose labels only from the predefined set that best fit the context of the issue. The labels available are [bug, documentation, duplicate, enhancement, good first issue, help wanted, invalid, question, wontfix]. Select those that most accurately describe the category and urgency of the issue.
+       - service Name: English only: State clearly the service or system impacted, including any identifiers or codes, ensuring all text is in English only in English.
+       - description: Write a detailed description of the problem in English only in English, starting with a clear statement of the main issue followed by directives for needed actions. Highlight the urgency and importance of resolving the issue to maintain smooth operations.
 
+    3. Format the JSON Output:
+       - The output should be a JSON object with clearly defined keys: 'title', 'labels', 'service Name', and 'description'. Each key must contain information accurately derived from the user's input and formatted clearly in English.
 
-    public async void sendData()
+    Example JSON Output for Training:
     {
-        Console.WriteLine(issue);
-        var requestBody = new { prompt = issue };
-        var json = JsonSerializer.Serialize(requestBody);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-        client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", "31ed80b9e6264b81b70c8abed0a7d156");
-        var response = await client.PostAsync("https://kickets7251834894.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-02-01 ", content);
-        var responseString = await response.Content.ReadAsStringAsync();
-        
-        Console.WriteLine(responseString);
-        
-        string connectionString = "Server=tcp:issues-server-db.database.windows.net,1433;Initial Catalog=issues;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=\"Active Directory Default\"";
-
-        using (SqlConnection connection = new SqlConnection(connectionString))
-        {
-            connection.Open();
-
-            // Create table if it doesn't exist
-            SqlCommand createTableCommand = new SqlCommand(@"IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Issues')
-                                                            CREATE TABLE Issues (
-                                                                Id INT IDENTITY(1,1) PRIMARY KEY,
-                                                                Title NVARCHAR(50),
-                                                                Description NVARCHAR(200),
-                                                                ServiceName NVARCHAR(50),
-                                                                Label NVARCHAR(50)
-                                                            );", connection);
-            createTableCommand.ExecuteNonQuery();
-
-            // Insert values into the table
-            SqlCommand insertCommand = new SqlCommand(@"INSERT INTO Issues (Title, Description, ServiceName, Label) 
-                                                        VALUES (@title, @description, @serviceName, @label);", connection);
-            insertCommand.Parameters.AddWithValue("@title", "Issue Title");
-            insertCommand.Parameters.AddWithValue("@description", issue);
-            insertCommand.Parameters.AddWithValue("@serviceName", "Service Name");
-            insertCommand.Parameters.AddWithValue("@label", "Label");
-            insertCommand.ExecuteNonQuery();
-
-            connection.Close();
-        }
+      'title': 'Account Locked in Active Directory (BKS-System) (TISC-53699)',
+      'labels': ['bug', 'help wanted'],
+      'service Name': 'Active Directory (BKS-System) (TISC-53699)',
+      'description': 'Problem: Account locked. Please thoroughly check the system and take necessary actions to resolve the issue. It is crucial that this problem is resolved promptly and efficiently to ensure smooth operation.'
     }
 
+    Ensure every word is in English!!! Only English!!!";
     
-    
+    private async Task SendData()
+    {
+        Console.WriteLine(issue);
+        client.DefaultRequestHeaders.Clear();
+        client.DefaultRequestHeaders.Add("api-key", ApiKey);
 
+        var json_data = new
+        {
+            messages = new[]
+            {
+                new { role = "system", content = SystemPrompt },
+                new { role = "user", content = issue }
+            },
+            max_tokens = 500,
+            temperature = Temperature
+        };
+
+        var json = JsonSerializer.Serialize(json_data);
+        var content = new StringContent(json, Encoding.UTF8, "application/json"); // Here 'Content-Type' is correctly set
+
+        var url = $"{Endpoint}openai/deployments/{DeploymentId}/chat/completions?api-version={ApiVersion}";
+        var response = await client.PostAsync(url, content);
+        
+        if (response.IsSuccessStatusCode)
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+            Console.WriteLine(responseContent);
+            
+        }
+        else
+        {
+            throw new Exception($"Request failed with status code {response.StatusCode}: {response.ReasonPhrase}");
+        }
+    }
+    
+    private class ApiResponse
+    {
+        public List<Choice> Choices { get; set; }
+    }
+
+    private class Choice
+    {
+        public Message Message { get; set; }
+    }
+
+    private class Message
+    {
+        public string Content { get; set; }
+    }
+    
+    private static async Task MakeRequest(GitIssue issueData)
+    {
+        Console.WriteLine("53");
+        Console.WriteLine(issueData);
+
+        // Request headers
+        client.DefaultRequestHeaders.CacheControl = CacheControlHeaderValue.Parse("no-cache");
+        client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", "31ed80b9e6264b81b70c8abed0a7d156");
+        
+        var uri = "https://apim-forstsee-hackathon.azure-api.net/github/Kelag-Hackathon-2024-Team-7/issues";
+        // Serialize the JSON object to a string
+        var json = JsonSerializer.Serialize(issueData, new JsonSerializerOptions { WriteIndented = true });
+        Console.WriteLine(json);
+
+        using (var content = new StringContent(json, Encoding.UTF8, "application/json"))
+        {
+            HttpResponseMessage response = await client.PostAsync(uri, content);
+            Console.WriteLine(response);
+        }
+    }
+    
+    public class DbIssue
+    {
+        [JsonPropertyName("title")]
+        public string title { get; set; }
+        
+        [JsonPropertyName("description")]
+        public string description { get; set; }
+        
+        [JsonPropertyName("service-name")]
+        public string serviceName { get; set; }
+        
+        [JsonPropertyName("labels")]
+        public string[] labels { get; set; }
+
+        public override string ToString()
+        {
+            return $"Title: {title}, Description: {description}, Service Name: {serviceName}, Labels: {string.Join(", ", labels)}";
+        }
+    }
+    public class GitIssue
+    {
+        [JsonPropertyName("title")]
+        public string Title { get; set; }
+        
+        [JsonPropertyName("body")]
+        public string body { get; set; }
+        
+        [JsonPropertyName("labels")]
+        public string[] Labels { get;set;}
 }
