@@ -99,7 +99,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
         }
         {
           name: 'aikeysecretnew'
-          keyVaultUrl: 'https://db-keyvault-team7.vault.azure.net/secrets/db-blueml-key-new/7aa8d5c715814c6ca4361674e5754179'
+          keyVaultUrl: 'https://db-keyvault-team7.vault.azure.net/secrets/ai-key-final/b1508eb1cf87444fa430473b74b10285'
           identity: managedIdentity.id
         }
       ]
