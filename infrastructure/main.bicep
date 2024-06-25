@@ -96,10 +96,9 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
           //    name: 'keyvaultenv'
           //    secretRef: 'keyvaultsecret'
           //  }
-          ]
-        }
-      ]
-    }
+        }   
+        ]
+      }
   }
 }
 
