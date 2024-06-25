@@ -84,7 +84,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
         }
         {
           name: 'keyvaultsecretteam7'
-          keyVaultUrl: 'https://db-keyvault-team7.vault.azure.net/secrets/db-keysecret/eda5f91d03b94eb581bce8b753182f9d'
+          keyVaultUrl: 'https://db-keyvault-team7.vault.azure.net/secrets/db-team7-connection-key/5ad94a1cd8df4c4080263c51a8bbb558'
           identity: managedIdentity.id
         }
         {
