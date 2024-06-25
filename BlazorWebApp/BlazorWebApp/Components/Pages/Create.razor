@@ -17,7 +17,7 @@
 
 <label for="issue">Enter the issue:</label>
 <input type="text" id="issue" name="issue" @bind="issue" />
-<h1>Secret: @a</h1>
+
 
 <button type="submit" @onclick="SendData">Send</button>
 @code {
@@ -25,7 +25,6 @@
     private static readonly HttpClient client = new HttpClient();
 
     // LLM values
-    private string a = System.Environment.GetEnvironmentVariable("apikeyllm");
     private readonly IWebHostEnvironment _env;
     private string ApiKey = "e323124e397b4928bb4d26f704cb1447";
     private string Endpoint = "https://kickets-more.openai.azure.com/";
@@ -141,6 +140,10 @@
             string description = innerRoot.GetProperty("description").GetString();
             string serviceName = innerRoot.GetProperty("service Name").GetString();
             string[] labels = innerRoot.GetProperty("labels").EnumerateArray().Select(l => l.GetString()).ToArray();
+            title= title.Replace("\"", "'");
+            description= description.Replace("\"", "'");
+            serviceName= serviceName.Replace("\"","'");
+            
 
             Console.WriteLine($"Description: {description}");
             Console.WriteLine($"Service Name: {serviceName}");
@@ -152,7 +155,7 @@
             dbIssue.serviceName = serviceName;
 
             //save to db
-            string connectionString = "Server=tcp:issues-db.database.windows.net,1433;Initial Catalog=issues-db;Persist Security Info=False;User ID=AdminDB;Password=BauerDieMauer1!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
+            string connectionString = System.Environment.GetEnvironmentVariable("keyvaultteam7env");
             try
             {
                 using (var conn = new SqlConnection(connectionString))
