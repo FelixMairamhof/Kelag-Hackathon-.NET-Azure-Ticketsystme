@@ -1,23 +1,23 @@
 {
   "Files": [
     {
-      "Id": "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7v1\\BlazorWebApp\\BlazorWebApp\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\BlazorWebApp.bundle.scp.css",
+      "Id": "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\BlazorWebApp.bundle.scp.css",
       "PackagePath": "staticwebassets\\BlazorWebApp.bundle.scp.css"
     },
     {
-      "Id": "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7v1\\BlazorWebApp\\BlazorWebApp\\wwwroot\\app.css",
+      "Id": "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\wwwroot\\app.css",
       "PackagePath": "staticwebassets\\app.css"
     },
     {
-      "Id": "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7v1\\BlazorWebApp\\BlazorWebApp\\wwwroot\\bootstrap\\bootstrap.min.css",
+      "Id": "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\wwwroot\\bootstrap\\bootstrap.min.css",
       "PackagePath": "staticwebassets\\bootstrap\\bootstrap.min.css"
     },
     {
-      "Id": "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7v1\\BlazorWebApp\\BlazorWebApp\\wwwroot\\bootstrap\\bootstrap.min.css.map",
+      "Id": "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\wwwroot\\bootstrap\\bootstrap.min.css.map",
       "PackagePath": "staticwebassets\\bootstrap\\bootstrap.min.css.map"
     },
     {
-      "Id": "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7v1\\BlazorWebApp\\BlazorWebApp\\wwwroot\\favicon.png",
+      "Id": "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\wwwroot\\favicon.png",
       "PackagePath": "staticwebassets\\favicon.png"
     },
     {

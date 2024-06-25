@@ -118,8 +118,7 @@
                             MakeRequest(a);
                             
                             //save to db
-
-
+                            await SaveToDatabase(dbIssue);
                         }
                         else
                         {
@@ -133,37 +132,6 @@
             {
                 Console.WriteLine("Error parsing JSON: " + ex.Message);
             }
-          
-            
-            
-            //save to DB
-            string connectionString = "Server=tcp:issues-db.database.windows.net,1433;Initial Catalog=issues-db;Persist Security Info=False;User ID=AdminDB;Password=BauerDieMauer1!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
-            try
-            {
-                using (var conn = new SqlConnection(connectionString))
-                {
-                    conn.Open();
-
-                    var command = new SqlCommand(
-                        "INSERT INTO TEST (test) VALUES (@issue);",
-                        conn);
-                    command.Parameters.AddWithValue("@issue", issue);
-                    command.ExecuteNonQuery();
-
-                    command = new SqlCommand("SELECT * FROM TEST", conn);
-                    using SqlDataReader reader = command.ExecuteReader();
-                    while (reader.Read())
-                    {
-                        Console.WriteLine(String.Format("DB: {0}", reader[0]));
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                // Table may already exist
-                Console.WriteLine(e.Message);
-            }
-            
         }
         else
         {
@@ -231,5 +199,29 @@
 
         [JsonPropertyName("labels")] public string[] Labels { get; set; }
     }
+    private async Task SaveToDatabase(DbIssue dbIssue)
+    {
+        string connectionString = "Server=tcp:issues-db.database.windows.net,1433;Initial Catalog=issues-db;Persist Security Info=False;User ID=AdminDB;Password=BauerDieMauer1!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
 
+        try
+        {
+            using (var conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                var command = new SqlCommand(
+                    "INSERT INTO Issues (title, description, service, labels) VALUES (@title,@description,@service,@labels);",
+                    conn);
+                command.Parameters.AddWithValue("@title", dbIssue.title);
+                command.Parameters.AddWithValue("@description", dbIssue.description);
+                command.Parameters.AddWithValue("@service", dbIssue.serviceName);
+                command.Parameters.AddWithValue("@labels", string.Join(';', dbIssue.labels));
+                await command.ExecuteNonQueryAsync();
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+    }
 }
