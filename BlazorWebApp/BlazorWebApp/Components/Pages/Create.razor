@@ -3,6 +3,7 @@
 @using System.Text.Json
 @using System.Net.Http.Headers
 @using System.Text.Json.Serialization
+@using Microsoft.Data.SqlClient
 @rendermode InteractiveServer
 
 <PageTitle>Create</PageTitle>
@@ -16,13 +17,14 @@
 @code {
     private string issue;
     private static readonly HttpClient client = new HttpClient();
-
+    
     // Direkt angegebene Variablen
     private string ApiKey = "f145425b32e24cef94705f19efd1d74a";
     private string Endpoint = "https://kickets7251834894.openai.azure.com/";
-    private string DeploymentId = "gpt-35-turbo-1106-kelag-kickets";
+    private string DeploymentId = "gpt-35-turbo";
     private string ApiVersion = "2024-02-01";
     private double Temperature = 0.5;
+
     private string SystemPrompt = @"To effectively generate structured JSON responses for IT issue tracking in English, ensure adherence to specific label constraints provided. Follow this method:
     
     1. Understand and Analyze the Input:
@@ -46,7 +48,7 @@
     }
 
     Ensure every word is in English!!! Only English!!!";
-    
+
     private async Task SendData()
     {
         Console.WriteLine(issue);
@@ -69,32 +71,104 @@
 
         var url = $"{Endpoint}openai/deployments/{DeploymentId}/chat/completions?api-version={ApiVersion}";
         var response = await client.PostAsync(url, content);
-        
+       
         if (response.IsSuccessStatusCode)
         {
             var responseContent = await response.Content.ReadAsStringAsync();
-            Console.WriteLine(responseContent);
+            Console.WriteLine("ResponseContent: "+responseContent);
+            try
+            {
+                JsonDocument jsonDoc = JsonDocument.Parse(responseContent);
+                JsonElement root = jsonDoc.RootElement;
+                JsonElement choicesArray = root.GetProperty("choices");
+                if (choicesArray.EnumerateArray().Any())
+                {
+                    JsonElement firstChoice = choicesArray.EnumerateArray().First();
+                    JsonElement messageElement;
+                    if (firstChoice.TryGetProperty("message", out messageElement))
+                    {
+                        if (messageElement.ValueKind == JsonValueKind.Object)
+                        {
+                            // Process messageElement as an object
+                            Console.WriteLine("92: " + messageElement);
+
+                            JsonElement root1 = messageElement;
+                            JsonElement contentElement = root1.GetProperty("content");
+
+                            // Parse the content string as a separate JSON document
+                            JsonDocument innerDoc = JsonDocument.Parse(contentElement.GetString());
+                            JsonElement innerRoot = innerDoc.RootElement;
+
+                            string title = innerRoot.GetProperty("title").GetString();
+                            string description = innerRoot.GetProperty("description").GetString();
+                            string serviceName = innerRoot.GetProperty("service Name").GetString();
+                            string[] labels = innerRoot.GetProperty("labels").EnumerateArray().Select(l => l.GetString()).ToArray();
+
+                            Console.WriteLine($"Title: {title}");
+                            Console.WriteLine($"Description: {description}");
+                            Console.WriteLine($"Service Name: {serviceName}");
+                            Console.WriteLine($"Labels: {string.Join(", ", labels)}");
+                            DbIssue dbIssue = new DbIssue();
+                            dbIssue.description = description;
+                            dbIssue.labels = labels;
+                            dbIssue.title = title;
+                            dbIssue.serviceName = serviceName;
+                            GitIssue a = DbIssueToGitIssue(dbIssue);
+                            Console.WriteLine("GitIssue: "+a);
+                            MakeRequest(a);
+                            
+                            //save to db
+
+
+                        }
+                        else
+                        {
+                            // Handle case where messageElement is not an object
+                            Console.WriteLine("Expected a JSON object, but found: " + messageElement.ValueKind.ToString());
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error parsing JSON: " + ex.Message);
+            }
+          
+            
+            
+            //save to DB
+            string connectionString = "Server=tcp:issues-db.database.windows.net,1433;Initial Catalog=issues-db;Persist Security Info=False;User ID=AdminDB;Password=BauerDieMauer1!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
+            try
+            {
+                using (var conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    var command = new SqlCommand(
+                        "INSERT INTO TEST (test) VALUES (@issue);",
+                        conn);
+                    command.Parameters.AddWithValue("@issue", issue);
+                    command.ExecuteNonQuery();
+
+                    command = new SqlCommand("SELECT * FROM TEST", conn);
+                    using SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        Console.WriteLine(String.Format("DB: {0}", reader[0]));
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                // Table may already exist
+                Console.WriteLine(e.Message);
+            }
             
         }
         else
         {
             throw new Exception($"Request failed with status code {response.StatusCode}: {response.ReasonPhrase}");
         }
-    }
-    
-    private class ApiResponse
-    {
-        public List<Choice> Choices { get; set; }
-    }
-
-    private class Choice
-    {
-        public Message Message { get; set; }
-    }
-
-    private class Message
-    {
-        public string Content { get; set; }
     }
     
     private static async Task MakeRequest(GitIssue issueData)
@@ -105,7 +179,7 @@
         // Request headers
         client.DefaultRequestHeaders.CacheControl = CacheControlHeaderValue.Parse("no-cache");
         client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", "31ed80b9e6264b81b70c8abed0a7d156");
-        
+
         var uri = "https://apim-forstsee-hackathon.azure-api.net/github/Kelag-Hackathon-2024-Team-7/issues";
         // Serialize the JSON object to a string
         var json = JsonSerializer.Serialize(issueData, new JsonSerializerOptions { WriteIndented = true });
@@ -117,34 +191,45 @@
             Console.WriteLine(response);
         }
     }
-    
+
     public class DbIssue
     {
-        [JsonPropertyName("title")]
-        public string title { get; set; }
-        
-        [JsonPropertyName("description")]
-        public string description { get; set; }
-        
-        [JsonPropertyName("service-name")]
-        public string serviceName { get; set; }
-        
-        [JsonPropertyName("labels")]
-        public string[] labels { get; set; }
+        [JsonPropertyName("title")] public string title { get; set; }
 
-        public override string ToString()
-        {
-            return $"Title: {title}, Description: {description}, Service Name: {serviceName}, Labels: {string.Join(", ", labels)}";
-        }
+        [JsonPropertyName("description")] public string description { get; set; }
+
+        [JsonPropertyName("service-name")] public string serviceName { get; set; }
+
+        [JsonPropertyName("labels")] public string[] labels { get; set; }
+
+     //   public override string ToString() { return $"Title: {title}, Description: {description}, Service Name: {serviceName}, Labels: {string.Join(", ", labels)}"; }
     }
+
+    public static GitIssue DbIssueToGitIssue(DbIssue dbIssue)
+    {
+        GitIssue a = new GitIssue();
+        a.body = dbIssue.description;
+        a.Labels = dbIssue.labels;
+        a.Title = dbIssue.title;
+        return a;
+    }
+    
+    public static DbIssue GitIssueToDbIssue(GitIssue gitIssue)
+    {
+        DbIssue a = new DbIssue();
+        a.description = gitIssue.body;
+        a.labels = gitIssue.Labels;
+        a.title = gitIssue.Title;
+        return a;
+    }
+
     public class GitIssue
     {
-        [JsonPropertyName("title")]
-        public string Title { get; set; }
-        
-        [JsonPropertyName("body")]
-        public string body { get; set; }
-        
-        [JsonPropertyName("labels")]
-        public string[] Labels { get;set;}
+        [JsonPropertyName("title")] public string Title { get; set; }
+
+        [JsonPropertyName("body")] public string body { get; set; }
+
+        [JsonPropertyName("labels")] public string[] Labels { get; set; }
+    }
+
 }
