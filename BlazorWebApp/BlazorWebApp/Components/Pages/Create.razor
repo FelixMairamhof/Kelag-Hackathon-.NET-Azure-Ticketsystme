@@ -23,6 +23,7 @@
     private string DeploymentId = "gpt-35-turbo-1106-kelag-kickets";
     private string ApiVersion = "2024-02-01";
     private double Temperature = 0.5;
+
     private string SystemPrompt = @"To effectively generate structured JSON responses for IT issue tracking in English, ensure adherence to specific label constraints provided. Follow this method:
     
     1. Understand and Analyze the Input:
@@ -46,7 +47,7 @@
     }
 
     Ensure every word is in English!!! Only English!!!";
-    
+
     private async Task SendData()
     {
         Console.WriteLine(issue);
@@ -69,19 +70,19 @@
 
         var url = $"{Endpoint}openai/deployments/{DeploymentId}/chat/completions?api-version={ApiVersion}";
         var response = await client.PostAsync(url, content);
-        
+
         if (response.IsSuccessStatusCode)
         {
             var responseContent = await response.Content.ReadAsStringAsync();
             Console.WriteLine(responseContent);
-            
+
         }
         else
         {
             throw new Exception($"Request failed with status code {response.StatusCode}: {response.ReasonPhrase}");
         }
     }
-    
+
     private class ApiResponse
     {
         public List<Choice> Choices { get; set; }
@@ -96,7 +97,7 @@
     {
         public string Content { get; set; }
     }
-    
+
     private static async Task MakeRequest(GitIssue issueData)
     {
         Console.WriteLine("53");
@@ -105,7 +106,7 @@
         // Request headers
         client.DefaultRequestHeaders.CacheControl = CacheControlHeaderValue.Parse("no-cache");
         client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", "31ed80b9e6264b81b70c8abed0a7d156");
-        
+
         var uri = "https://apim-forstsee-hackathon.azure-api.net/github/Kelag-Hackathon-2024-Team-7/issues";
         // Serialize the JSON object to a string
         var json = JsonSerializer.Serialize(issueData, new JsonSerializerOptions { WriteIndented = true });
@@ -117,34 +118,30 @@
             Console.WriteLine(response);
         }
     }
-    
+
     public class DbIssue
     {
-        [JsonPropertyName("title")]
-        public string title { get; set; }
-        
-        [JsonPropertyName("description")]
-        public string description { get; set; }
-        
-        [JsonPropertyName("service-name")]
-        public string serviceName { get; set; }
-        
-        [JsonPropertyName("labels")]
-        public string[] labels { get; set; }
+        [JsonPropertyName("title")] public string title { get; set; }
+
+        [JsonPropertyName("description")] public string description { get; set; }
+
+        [JsonPropertyName("service-name")] public string serviceName { get; set; }
+
+        [JsonPropertyName("labels")] public string[] labels { get; set; }
 
         public override string ToString()
         {
             return $"Title: {title}, Description: {description}, Service Name: {serviceName}, Labels: {string.Join(", ", labels)}";
         }
     }
+
     public class GitIssue
     {
-        [JsonPropertyName("title")]
-        public string Title { get; set; }
-        
-        [JsonPropertyName("body")]
-        public string body { get; set; }
-        
-        [JsonPropertyName("labels")]
-        public string[] Labels { get;set;}
+        [JsonPropertyName("title")] public string Title { get; set; }
+
+        [JsonPropertyName("body")] public string body { get; set; }
+
+        [JsonPropertyName("labels")] public string[] Labels { get; set; }
+    }
+
 }

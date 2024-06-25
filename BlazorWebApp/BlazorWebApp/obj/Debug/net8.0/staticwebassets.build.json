@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "w9zveh1RAyW4ghJtoCyL7TRHcRBb+HGBVtZR5iYtDvQ=",
+  "Hash": "JfKrgKGCI/cQVyQCPR1UWKz6SZr0qkfcmGuHzflegbU=",
   "Source": "BlazorWebApp",
   "BasePath": "_content/BlazorWebApp",
   "Mode": "Default",
@@ -10,17 +10,17 @@
     {
       "Name": "BlazorWebApp\\wwwroot",
       "Source": "BlazorWebApp",
-      "ContentRoot": "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\wwwroot\\",
       "BasePath": "_content/BlazorWebApp",
       "Pattern": "**"
     }
   ],
   "Assets": [
     {
-      "Identity": "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\obj\\Debug\\net8.0\\scopedcss\\bundle\\BlazorWebApp.styles.css",
+      "Identity": "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\obj\\Debug\\net8.0\\scopedcss\\bundle\\BlazorWebApp.styles.css",
       "SourceId": "BlazorWebApp",
       "SourceType": "Computed",
-      "ContentRoot": "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\obj\\Debug\\net8.0\\scopedcss\\bundle\\",
+      "ContentRoot": "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\obj\\Debug\\net8.0\\scopedcss\\bundle\\",
       "BasePath": "_content/BlazorWebApp",
       "RelativePath": "BlazorWebApp.styles.css",
       "AssetKind": "All",
@@ -33,13 +33,13 @@
       "AssetTraitValue": "ApplicationBundle",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\obj\\Debug\\net8.0\\scopedcss\\bundle\\BlazorWebApp.styles.css"
+      "OriginalItemSpec": "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\obj\\Debug\\net8.0\\scopedcss\\bundle\\BlazorWebApp.styles.css"
     },
     {
-      "Identity": "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\BlazorWebApp.bundle.scp.css",
+      "Identity": "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\BlazorWebApp.bundle.scp.css",
       "SourceId": "BlazorWebApp",
       "SourceType": "Computed",
-      "ContentRoot": "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\",
+      "ContentRoot": "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\",
       "BasePath": "_content/BlazorWebApp",
       "RelativePath": "BlazorWebApp.bundle.scp.css",
       "AssetKind": "All",
@@ -52,13 +52,13 @@
       "AssetTraitValue": "ProjectBundle",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\BlazorWebApp.bundle.scp.css"
+      "OriginalItemSpec": "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\BlazorWebApp.bundle.scp.css"
     },
     {
-      "Identity": "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\wwwroot\\app.css",
+      "Identity": "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\wwwroot\\app.css",
       "SourceId": "BlazorWebApp",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\wwwroot\\",
       "BasePath": "_content/BlazorWebApp",
       "RelativePath": "app.css",
       "AssetKind": "All",
@@ -74,10 +74,10 @@
       "OriginalItemSpec": "wwwroot\\app.css"
     },
     {
-      "Identity": "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\wwwroot\\bootstrap\\bootstrap.min.css",
+      "Identity": "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\wwwroot\\bootstrap\\bootstrap.min.css",
       "SourceId": "BlazorWebApp",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\wwwroot\\",
       "BasePath": "_content/BlazorWebApp",
       "RelativePath": "bootstrap/bootstrap.min.css",
       "AssetKind": "All",
@@ -93,10 +93,10 @@
       "OriginalItemSpec": "wwwroot\\bootstrap\\bootstrap.min.css"
     },
     {
-      "Identity": "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\wwwroot\\bootstrap\\bootstrap.min.css.map",
+      "Identity": "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\wwwroot\\bootstrap\\bootstrap.min.css.map",
       "SourceId": "BlazorWebApp",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\wwwroot\\",
       "BasePath": "_content/BlazorWebApp",
       "RelativePath": "bootstrap/bootstrap.min.css.map",
       "AssetKind": "All",
@@ -112,10 +112,10 @@
       "OriginalItemSpec": "wwwroot\\bootstrap\\bootstrap.min.css.map"
     },
     {
-      "Identity": "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\wwwroot\\favicon.png",
+      "Identity": "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\wwwroot\\favicon.png",
       "SourceId": "BlazorWebApp",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\Jonah\\RiderProjects\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\feber\\Coding\\HackathonKelag\\Kelag-Hackathon-2024-Team-7\\BlazorWebApp\\BlazorWebApp\\wwwroot\\",
       "BasePath": "_content/BlazorWebApp",
       "RelativePath": "favicon.png",
       "AssetKind": "All",
